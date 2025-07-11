@@ -24,204 +24,147 @@ jobs:
           channel: master
           cache: true
 
-      - name: Update to latest Flutter
+      - name: Update Flutter
         run: |
-          flutter upgrade --force
-          flutter --version
-          dart --version
+          echo "🔄 Updating Flutter..."
+          flutter upgrade --force > /dev/null 2>&1
+          echo "✅ Flutter version: $(flutter --version --machine | grep -o '"frameworkVersion":"[^"]*"' | cut -d'"' -f4)"
 
       - name: Install CocoaPods
         run: |
-          sudo gem install cocoapods
-          pod --version
+          echo "📦 Installing CocoaPods..."
+          sudo gem install cocoapods > /dev/null 2>&1
+          echo "✅ CocoaPods version: $(pod --version)"
 
-      - name: Verify Xcode and iOS SDK
+      - name: Verify iOS SDK
         run: |
-          xcode-select -p
-          xcrun --show-sdk-version
-          xcodebuild -showsdks | grep iOS
-          echo "Available iOS SDKs for targeting iOS 16.1:"
-          xcodebuild -showsdks | grep -E "ios1[6-9]|ios[2-9][0-9]" || echo "iOS 16+ SDKs available"
+          echo "🍎 iOS SDK check..."
+          if xcodebuild -showsdks | grep -q "ios1[6-9]"; then
+            echo "✅ iOS 16+ SDK available"
+          else
+            echo "❌ iOS 16+ SDK not found"
+            exit 1
+          fi
 
       - name: Flutter doctor
-        run: flutter doctor -v
+        run: |
+          echo "🔍 Running Flutter doctor..."
+          flutter doctor --android-licenses > /dev/null 2>&1 || true
+          if flutter doctor | grep -q "No issues found"; then
+            echo "✅ Flutter doctor: No issues"
+          else
+            echo "⚠️ Flutter doctor found issues:"
+            flutter doctor | grep "✗\|!"
+          fi
 
       - name: Install dependencies
         run: |
-          flutter pub get
+          echo "📥 Installing dependencies..."
+          flutter pub get > /dev/null 2>&1
           
-          # Handle dependency constraint issues by trying to upgrade
-          echo "Checking for dependency issues..."
-          flutter pub outdated || echo "Some packages have newer versions available"
-          
-          # Generate build runner code
-          flutter pub run build_runner build --delete-conflicting-outputs
+          echo "🔨 Running build_runner..."
+          flutter pub run build_runner build --delete-conflicting-outputs > /dev/null 2>&1
+          echo "✅ Dependencies installed"
 
-      - name: Create env file (if missing)
+      - name: Create env files
         run: |
+          echo "⚙️ Creating environment files..."
           mkdir -p env
-          if [ ! -f env/dev.json ]; then
-            echo '{"BASE_URL": "", "API_KEY": ""}' > env/dev.json
-          fi
-          if [ ! -f env/prod.json ]; then
-            echo '{"BASE_URL": "", "API_KEY": ""}' > env/prod.json
-          fi
-          echo "Contents of env/dev.json:"
-          cat env/dev.json
-          echo "Contents of env/prod.json:"
-          cat env/prod.json
+          echo '{"BASE_URL": "", "API_KEY": ""}' > env/dev.json
+          echo '{"BASE_URL": "", "API_KEY": ""}' > env/prod.json
+          echo "✅ Environment files created"
 
-      - name: Clean before build
+      - name: Clean and configure iOS
         run: |
-          flutter clean
-          cd ios
-          rm -rf Pods Podfile.lock
-          cd ..
-
-      - name: Configure iOS deployment target
-        run: |
-          echo "Setting iOS deployment target to 16.1"
+          echo "🧹 Cleaning project..."
+          flutter clean > /dev/null 2>&1
+          cd ios && rm -rf Pods Podfile.lock && cd ..
           
-          # Try generating Flutter iOS configuration files with prod flavor
-          flutter precache --ios
-          
-          # Try config-only build with prod flavor, fall back to dev if needed
-          flutter build ios --config-only --flavor prod || {
-            echo "Config with prod flavor failed, trying dev flavor..."
-            flutter build ios --config-only --flavor dev || {
-              echo "Config-only builds failed, proceeding without pre-configuration..."
-            }
-          }
+          echo "⚙️ Configuring iOS deployment target..."
+          flutter precache --ios > /dev/null 2>&1
           
           cd ios
-          
-          # Check if Flutter generated files exist
-          if [ -d "Flutter" ]; then
-            echo "Checking Flutter generated files:"
-            ls -la Flutter/
-          else
-            echo "Flutter directory not found, will be generated during build"
-          fi
-          
-          # Update Runner.xcodeproj
+          # Update deployment target
           sed -i '' 's/IPHONEOS_DEPLOYMENT_TARGET = [0-9]*\.[0-9]*/IPHONEOS_DEPLOYMENT_TARGET = 16.1/g' Runner.xcodeproj/project.pbxproj
           
-          # Update Podfile if it exists
+          # Update Podfile if exists
           if [ -f Podfile ]; then
             sed -i '' "s/platform :ios, '[0-9]*\.[0-9]*'/platform :ios, '16.1'/g" Podfile
-            echo "Updated Podfile platform target"
-            
-            # Try installing CocoaPods dependencies
-            pod install --repo-update || {
-              echo "Pod install failed, will retry during build"
-            }
+            echo "✅ iOS target set to 16.1"
           else
-            echo "Podfile not found, will be generated by Flutter during build"
+            echo "⚠️ Podfile not found, will be generated during build"
           fi
-          
-          # Verify changes
-          echo "Deployment target in project:"
-          grep "IPHONEOS_DEPLOYMENT_TARGET" Runner.xcodeproj/project.pbxproj | head -3
-          
           cd ..
 
-      - name: Build iOS (no codesign)
+      - name: Build iOS App
         run: |
-          echo "Starting iOS build..."
-          echo "Available schemes: dev, prod, ShareExtension"
+          echo "🏗️ Building iOS app..."
           
-          # First attempt: Build with prod flavor
-          echo "Attempting prod flavor build..."
-          flutter build ios \
-            --release \
-            --no-codesign \
-            --flavor prod \
-            --dart-define=IPHONEOS_DEPLOYMENT_TARGET=16.1 \
-            -t lib/main.dart \
-            --verbose && echo "✅ Prod build successful!" || {
+          # Try prod flavor first
+          if flutter build ios --release --no-codesign --flavor prod --dart-define=IPHONEOS_DEPLOYMENT_TARGET=16.1 -t lib/main.dart > build.log 2>&1; then
+            echo "✅ Prod build successful!"
+            BUILD_FLAVOR="prod"
+          elif flutter build ios --release --no-codesign --flavor dev --dart-define-from-file env/dev.json --dart-define=IPHONEOS_DEPLOYMENT_TARGET=16.1 -t lib/main.dart > build.log 2>&1; then
+            echo "✅ Dev build successful!"
+            BUILD_FLAVOR="dev"
+          else
+            echo "❌ Build failed! Last 50 lines of build log:"
+            tail -50 build.log
+            echo ""
+            echo "🔍 Checking for common issues..."
             
-            echo "❌ Prod build failed, trying dev flavor..."
+            # Check for specific error patterns
+            if grep -q "Code Signing Error" build.log; then
+              echo "→ Code signing issue detected"
+            elif grep -q "No such module" build.log; then
+              echo "→ Missing module/dependency issue"
+            elif grep -q "Minimum deployment target" build.log; then
+              echo "→ Deployment target issue"
+            elif grep -q "Podfile" build.log; then
+              echo "→ CocoaPods issue"
+            fi
             
-            # Second attempt: Build with dev flavor
-            flutter build ios \
-              --release \
-              --no-codesign \
-              --flavor dev \
-              --dart-define-from-file env/dev.json \
-              --dart-define=IPHONEOS_DEPLOYMENT_TARGET=16.1 \
-              -t lib/main.dart \
-              --verbose && echo "✅ Dev build successful!" || {
-              
-              echo "❌ Both flavored builds failed. Debugging..."
-              echo "Available Xcode schemes:"
-              xcodebuild -list -project ios/Runner.xcodeproj || echo "Failed to list schemes"
-              
-              echo "iOS project structure:"
-              ls -la ios/
-              
-              echo "Checking for build errors..."
-              if [ -d "ios/build" ]; then
-                find ios/build -name "*.log" -exec echo "=== {} ===" \; -exec cat {} \; || echo "No build logs found"
-              fi
-              
-              echo "Last resort: trying to build without explicit target file..."
-              flutter build ios \
-                --release \
-                --no-codesign \
-                --flavor prod \
-                --dart-define=IPHONEOS_DEPLOYMENT_TARGET=16.1 \
-                --verbose || {
-                
-                echo "All build attempts failed. Exiting."
-                exit 1
-              }
-            }
-          }
+            exit 1
+          fi
+          
+          echo "BUILD_FLAVOR=$BUILD_FLAVOR" >> $GITHUB_ENV
 
       - name: Create IPA
         run: |
+          echo "📦 Creating IPA..."
           cd build/ios/iphoneos
           mkdir Payload
           cp -r Runner.app Payload/
-          zip -r ../../../boorusama-ios16.1-dev.ipa Payload/
-          
-          # Verify iOS deployment target in the built app
-          echo "Verifying iOS deployment target:"
-          otool -l Payload/Runner.app/Runner | grep -A 3 LC_VERSION_MIN_IPHONEOS || echo "iOS 16.1 target verified"
+          zip -r ../../../boorusama-ios16.1-${{ env.BUILD_FLAVOR }}.ipa Payload/ > /dev/null 2>&1
+          echo "✅ IPA created: boorusama-ios16.1-${{ env.BUILD_FLAVOR }}.ipa"
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: boorusama-ios16.1-dev
-          path: boorusama-ios16.1-dev.ipa
+          name: boorusama-ios16.1-${{ env.BUILD_FLAVOR }}
+          path: boorusama-ios16.1-${{ env.BUILD_FLAVOR }}.ipa
           retention-days: 30
-          
+
       - name: Build Summary
         run: |
-          echo "✅ iOS app built successfully!"
-          echo "📱 Target iOS version: 16.1+"
-          echo "📦 IPA files created:"
-          ls -la boorusama-ios16.1-*.ipa
-          echo "💾 Compatible with iOS 16.1.1 and newer versions"
-          echo "🎯 Flavor: $(ls boorusama-ios16.1-*.ipa | grep -o 'prod\|dev' || echo 'prod')"
+          echo "🎉 Build completed successfully!"
+          echo "📱 iOS Target: 16.1+"
+          echo "🏷️ Flavor: ${{ env.BUILD_FLAVOR }}"
+          echo "📂 Artifact: boorusama-ios16.1-${{ env.BUILD_FLAVOR }}.ipa"
 
-      - name: Debug build environment
+      - name: Debug on Failure
         if: failure()
         run: |
-          echo "=== Build Environment Debug ==="
+          echo "🚨 Build failed - Debug information:"
+          echo ""
           echo "Flutter version:"
-          flutter --version
-          echo "Dart version:"
-          dart --version
+          flutter --version | head -3
+          echo ""
           echo "Xcode version:"
           xcodebuild -version
+          echo ""
+          echo "Last 100 lines of build log:"
+          tail -100 build.log 2>/dev/null || echo "No build log found"
+          echo ""
           echo "iOS project structure:"
-          ls -la ios/
-          echo "Podfile contents:"
-          cat ios/Podfile || echo "No Podfile found"
-          echo "Flutter dependencies:"
-          flutter pub deps
-          echo "CocoaPods version:"
-          pod --version
-          echo "Available iOS simulators:"
-          xcrun simctl list devices available
+          ls -la ios/ 2>/dev/null || echo "iOS directory not found"
