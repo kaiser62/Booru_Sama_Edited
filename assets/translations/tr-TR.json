@@ -1,0 +1,176 @@
+{
+  "generic": {
+    "done": "Tamam",
+    "errors": {
+      "no_data": "ulaşılabilir veri yok",
+      "unknown": "Birşeyler ters gitti"
+    },
+    "action": {
+      "add": "Ekle",
+      "delete": "Sil",
+      "edit": "Düzenle",
+      "ok": "Tamam",
+      "cancel": "İptal",
+      "duplicate": "Çoğalt"
+    },
+    "view": "Görünüm"
+  },
+  "profile": {
+    "favorites": "Favoriler",
+    "profile": "Profil",
+    "copy_user_id": "Kullanıcı kimliğini kopyala",
+    "messages": "Mesajlar"
+  },
+  "network": {
+    "unavailable": "Bağlantı mevcut değil"
+  },
+  "tag": {
+    "related": {
+      "more": "Daha fazla",
+      "related": "İlişkili",
+      "add_to_current_search": "Mevcut aramaya ekle",
+      "open_wiki": "Wiki'yi aç"
+    },
+    "explore": {
+      "new": "Yeni",
+      "popular": "Popüler"
+    }
+  },
+  "post": {
+    "detail": {
+      "view": "Gör(incele)",
+      "view_in_browser": "Tarayıcıda aç",
+      "file_details": "Dosya detayları",
+      "size": "Ölçek",
+      "resolution": "Çözünürlük",
+      "rating": "Puanlama",
+      "file_format": "Dosya formatı",
+      "share": {
+        "source": "Kaynak linkini paylaş",
+        "booru": "Booru linkini paylaş",
+        "image": "Görüntüyü paylaş"
+      },
+      "copied": "Kopyalandı",
+      "show_original": "Orijinali göster",
+      "show_translated": "Çevrilmişi göster",
+      "login_required_notice": "Bu eylemi gerçekleştirmek için giriş yapman lazım",
+      "open_wiki": "Wiki'yi aç",
+      "add_to_blacklist": "Karalisteye ekle",
+      "add_to_favorites": "Favorilere ekle",
+      "copy_and_open_saved_search": "Kopyala ve kayıtlı aramayı aç",
+      "score": {
+        "one": "Nokta",
+        "other": "Noktalar"
+      },
+      "source_label": "Kaynak",
+      "related_posts": "İlişkili gönderiler",
+      "add_to_bookmark": "Yer imlerine ekle",
+      "remove_from_bookmark": "Yer imlerinden kaldır"
+    },
+    "action": {
+      "preview": "Önizleme",
+      "view_comments": "Yorumları görüntüle",
+      "add_to_favorite_group": "Favori gruba ekle",
+      "select": "Seç"
+    },
+    "image_fullview": {
+      "view_original": "Orijinalini göster"
+    }
+  },
+  "comment": {
+    "comments": "Yorumlar",
+    "create": {
+      "hint": "Yorum",
+      "loading": "Lütfen bekleyin...",
+      "error": "Hata"
+    },
+    "list": {
+      "edit": "Düzenle",
+      "reply": "Yanıt ver",
+      "reply_to": "Şuna cevap olarak",
+      "delete": "Sil",
+      "noComments": "Hiçbir yorum yok",
+      "last_updated": "Son güncelleme tarihi",
+      "send": "Gönder"
+    },
+    "counter": {
+      "one": "Yorum",
+      "other": "Yorumlar"
+    }
+  },
+  "explore": {
+    "latest": "En son",
+    "popular": "Popüler",
+    "hot": "Çok yeni",
+    "most_viewed": "En çok görüntülenen",
+    "see_more": "Daha fazlasını gör",
+    "explore": "Keşfet"
+  },
+  "search": {
+    "errors": {
+      "generic": "Bir şeyler ters gitti",
+      "tag_limit": "En fazla tag sınırına ulaşıldı. Daha fazla etiket ile arama yapabilmek için üyeliğini geliştir.",
+      "database_timeout": "Aramanız olması gerektiğinden fazla uzun sürdü ve iptal edildi.",
+      "rate_limited": "İş yapma sıklığınız sınırlandı. Lütfen daha sonra tekrar deneyin",
+      "pagination_limit": "Sayfalandırma sınırına ulaştınız. Daha fazla kaydırma yapamazsınız",
+      "max_capacity": "Sunucu fazla yük altında ve şu anda yapılan isteğe yanıt vermiyor, lütfen daha sonra tekrar deneyin",
+      "down": "Sunucu çöktü. Lütfen daha sonra tekrar deneyin",
+      "access_denied": "Erişim engellendi",
+      "forbidden": "Yetkilendime başarısız",
+      "unknown": "Bilinmeyen sunucu hatası, lütfen geliştiriciye bu sorunu bildirin"
+    },
+    "hint": "Ara...",
+    "no_result": "Derinlemesine aradık, fakat hiçbir sonuç bulunamadı.",
+    "search_options": "Arama seçenekleri",
+    "metatags_notice": "Ücretsiz üst etiketler etiket arama sınırında sayılmaz",
+    "history": {
+      "history": "Geçmiş",
+      "clear": "Temizle",
+      "recent": "Son zamanlarda"
+    },
+    "trending": "Trendde",
+    "remove_all_selected": "Seçilmiş bütün etiketleri kaldır",
+    "result_counter": {
+      "one": "$n Sonuç",
+      "other": "$n Sonuçlar"
+    },
+    "no_result_notice": "Sonuç yok",
+    "search_in_progress_notice": "Aranıyor..."
+  },
+  "pool": {
+    "pool": "Havuz",
+    "pool_gallery": "Havuz Galerisi",
+    "order": {
+      "recent": "Son zamanlarda",
+      "new": "Yeni",
+      "post_count": "Gönderi sayısı",
+      "name": "İsim"
+    },
+    "category": {
+      "series": "Diziler",
+      "collection": "Koleksiyon"
+    },
+    "search": {
+      "hint": "Bir havuz ara"
+    },
+    "detail": {
+      "last_updated": "Son güncelleeme"
+    }
+  },
+  "settings": {
+    "settings": "Ayarlar",
+    "app_settings": "Uygulama Ayarları",
+    "appearance": {
+      "appearance": "Uygulama Görünümü",
+      "show_scores": "Puanları göster",
+      "booru_config": "Booru profili"
+    },
+    "language": {
+      "language": "Dil",
+      "language_name": "Türkçe"
+    }
+  },
+  "forum": {
+    "forum": "Forum"
+  }
+}

@@ -1,0 +1,75 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "boorusama",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "args": [
+                "--flavor",
+                "dev",
+                "--dart-define-from-file",
+                "env/dev.json"
+            ]
+        },
+        {
+            "name": "boorusama (windows + linux)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug",
+            "args": [
+                "--dart-define-from-file",
+                "env/dev.json"
+            ]
+        },
+        {
+            "name": "boorusama (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "args": [
+                "--flavor",
+                "dev",
+                "--dart-define-from-file",
+                "env/dev.json"
+            ]
+        },
+        {
+            "name": "boorusama (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "args": [
+                "--flavor",
+                "dev",
+                "--dart-define-from-file",
+                "env/dev.json"
+            ]
+        },
+        {
+            "name": "boorusama prod (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "args": [
+                "--flavor",
+                "prod",
+                "--dart-define-from-file",
+                "env/prod.json"
+            ]
+        },
+        {
+            "name": "boorusama prod (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release",
+            "args": [
+                "--flavor",
+                "prod",
+                "--dart-define-from-file",
+                "env/prod.json"
+            ]
+        }
+    ]
+}
